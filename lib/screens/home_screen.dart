@@ -6,6 +6,7 @@ import '../widgets/civilization_chips.dart';
 import '../widgets/collection_item.dart';
 import '../widgets/page_indicator.dart';
 import '../widgets/bottom_nav_bar.dart';
+import 'scan_screen.dart';
 import 'settings_screen.dart';
 import 'pinturas_screen.dart';
 
@@ -193,47 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildPage() {
     switch (_navIndex) {
       case 1:
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.qr_code_scanner, size: 80, color: AppColors.gold),
-                SizedBox(height: 20),
-                Text(
-                  'Escanea una pieza para descubrir más historia.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+        return const ScanScreen();
       case 2:
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.history, size: 80, color: AppColors.gold),
-                SizedBox(height: 20),
-                Text(
-                  'Aquí aparecerá tu historial de exploraciones.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+        return const PinturasScreen();
       case 3:
         return const SettingsScreen();
       case 0:
