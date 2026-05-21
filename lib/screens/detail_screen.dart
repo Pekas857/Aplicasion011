@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/artifact.dart';
+import '../models/picture.dart';
 
 class DetailScreen extends StatefulWidget {
   final Artifact artifact;
@@ -45,13 +46,6 @@ class _DetailScreenState extends State<DetailScreen>
             'o eras del mundo. En el centro se encuentra Tonatiuh, el dios solar, '
             'rodeado por los glifos de los cuatro soles anteriores y los 20 días '
             'del calendario sagrado.';
-      case ArtifactCategory.inca:
-        return 'El Tumi Ceremonial es un cuchillo ritual utilizado en ceremonias '
-            'religiosas por las culturas preincaicas de la costa norte del Perú. '
-            'Está elaborado en oro sólido y representa al dios Naylamp, fundador '
-            'legendario de la dinastía Lambayeque. La figura presenta una elaborada '
-            'tocadura semicircular y orejeras, elementos típicos de la iconografía '
-            'Chimú-Lambayeque.';
       case ArtifactCategory.olmeca:
         return 'Las Cabezas Colosales olmecas son monumentales esculturas de basalto '
             'que representan rostros humanos con rasgos individualizados. La Cabeza '
@@ -59,6 +53,12 @@ class _DetailScreenState extends State<DetailScreen>
             'Mide aproximadamente 2.85 metros de altura y pesa alrededor de 25 '
             'toneladas. Se cree que representan a gobernantes olmecas, cada una '
             'con características faciales únicas y elaborados tocados.';
+      case ArtifactCategory.pinturasRupestres:
+        return 'Las pinturas rupestres representan los primeros intentos del ser humano '
+            'de narrar su entorno y sus creencias. Estas obras se encuentran en cuevas '
+            'como la Cueva de las Manos y datan de miles de años antes de Cristo. '
+            'A través de pigmentos naturales y manos en negativo, reflejan la vida '
+            'y el arte de las sociedades prehistóricas de la región.';
     }
   }
 
@@ -77,18 +77,18 @@ class _DetailScreenState extends State<DetailScreen>
             'a unos 40 centímetros de profundidad junto con la estatua de '
             'Coatlicue. Actualmente se exhibe en la Sala Mexica del Museo '
             'Nacional de Antropología.';
-      case ArtifactCategory.inca:
-        return 'El Tumi fue descubierto en la región de Lambayeque, en el norte '
-            'del Perú. Esta pieza en particular fue hallada en la Huaca Loro, '
-            'un importante sitio arqueológico de la cultura Sicán. Los tumis '
-            'eran utilizados tanto en ceremonias rituales como en prácticas '
-            'quirúrgicas, incluyendo la trepanación craneal.';
       case ArtifactCategory.olmeca:
         return 'La Cabeza Colosal No. 1 fue descubierta en 1862 por el viajero '
             'José María Melgar y Serrano en la hacienda de Hueyapan, en el '
             'municipio de Texistepec, Veracruz. Las investigaciones posteriores '
             'de Matthew Stirling en 1938-1946 revelaron la importancia de la '
             'civilización olmeca como la cultura madre de Mesoamérica.';
+      case ArtifactCategory.pinturasRupestres:
+        return 'Las pinturas de la Cueva de las Manos fueron registradas por '
+            'arqueólogos en el siglo XX como uno de los ejemplos más antiguos '
+            'del arte rupestre americano. Se hicieron con pigmentos naturales '
+            'aplicados directamente sobre las paredes de la cueva, creando un '
+            'testimonio visual de la vida de los primeros habitantes de la región.';
     }
   }
 
@@ -98,10 +98,10 @@ class _DetailScreenState extends State<DetailScreen>
         return 'Período Clásico (603 – 683 d.C.)';
       case ArtifactCategory.mexica:
         return 'Período Posclásico (1479 d.C.)';
-      case ArtifactCategory.inca:
-        return 'Período Intermedio Tardío (900 – 1470 d.C.)';
       case ArtifactCategory.olmeca:
         return 'Período Preclásico (1200 – 900 a.C.)';
+      case ArtifactCategory.pinturasRupestres:
+        return 'Arte prehistórico (hasta 10,000 a.C.)';
     }
   }
 
@@ -111,10 +111,10 @@ class _DetailScreenState extends State<DetailScreen>
         return 'Descubierto en 1952';
       case ArtifactCategory.mexica:
         return 'Descubierto en 1790';
-      case ArtifactCategory.inca:
-        return 'Descubierto en 1936';
       case ArtifactCategory.olmeca:
         return 'Descubierto en 1862';
+      case ArtifactCategory.pinturasRupestres:
+        return 'Descubierto en 10,000 a.C.';
     }
   }
 
@@ -124,10 +124,10 @@ class _DetailScreenState extends State<DetailScreen>
         return AppColors.mayaTag;
       case ArtifactCategory.mexica:
         return AppColors.mexTag;
-      case ArtifactCategory.inca:
-        return const Color(0xFF4A8B8B);
       case ArtifactCategory.olmeca:
         return AppColors.olmecaTag;
+      case ArtifactCategory.pinturasRupestres:
+        return const Color(0xFF6E7A35);
     }
   }
 
@@ -137,10 +137,10 @@ class _DetailScreenState extends State<DetailScreen>
         return AppColors.mayaTagText;
       case ArtifactCategory.mexica:
         return AppColors.goldLight;
-      case ArtifactCategory.inca:
-        return const Color(0xFF80D0D0);
       case ArtifactCategory.olmeca:
         return const Color(0xFFD4A870);
+      case ArtifactCategory.pinturasRupestres:
+        return const Color(0xFFD9DBA3);
     }
   }
 
@@ -150,10 +150,10 @@ class _DetailScreenState extends State<DetailScreen>
         return Icons.masks;
       case ArtifactCategory.mexica:
         return Icons.wb_sunny;
-      case ArtifactCategory.inca:
-        return Icons.content_cut;
       case ArtifactCategory.olmeca:
         return Icons.face;
+      case ArtifactCategory.pinturasRupestres:
+        return Icons.brush;
     }
   }
 
@@ -237,7 +237,9 @@ class _DetailScreenState extends State<DetailScreen>
                               'Modelo 3D',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: AppColors.textMuted.withValues(alpha: 0.6),
+                                color: AppColors.textMuted.withValues(
+                                  alpha: 0.6,
+                                ),
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
@@ -255,7 +257,9 @@ class _DetailScreenState extends State<DetailScreen>
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 7),
+                              horizontal: 14,
+                              vertical: 7,
+                            ),
                             decoration: BoxDecoration(
                               color: _tagColor.withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(20),
@@ -278,8 +282,9 @@ class _DetailScreenState extends State<DetailScreen>
                             _discovered,
                             style: TextStyle(
                               fontSize: 13,
-                              color:
-                                  AppColors.textSecondary.withValues(alpha: 0.7),
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                           ),
                         ],
@@ -351,8 +356,7 @@ class _DetailScreenState extends State<DetailScreen>
                         children: [
                           // Historia tab
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
                               _historyText,
                               style: const TextStyle(
@@ -364,8 +368,7 @@ class _DetailScreenState extends State<DetailScreen>
                           ),
                           // Descubrimiento tab
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
                               _discoveryText,
                               style: const TextStyle(
@@ -387,8 +390,10 @@ class _DetailScreenState extends State<DetailScreen>
             // Bottom AR button
             SafeArea(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   height: 56,

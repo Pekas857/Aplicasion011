@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../screens/pinturas_screen.dart';
 
 class CivilizationChips extends StatefulWidget {
   const CivilizationChips({super.key});
@@ -15,8 +16,8 @@ class _CivilizationChipsState extends State<CivilizationChips> {
     'Todas',
     'Maya',
     'Mexica',
-    'Inca',
     'Olmeca',
+    'Pinturas rupestres',
   ];
 
   @override
@@ -36,11 +37,22 @@ class _CivilizationChipsState extends State<CivilizationChips> {
                 setState(() {
                   _selectedIndex = index;
                 });
+                if (index == 4) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PinturasScreen(),
+                    ),
+                  );
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.chipSelected
