@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:ar_historia/api/ai_tts.dart';
 
 import '../theme/app_theme.dart';
 
@@ -15,6 +18,9 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
+  final AudioPlayer _player = AudioPlayer();
+  final String servidorTTS = Mittsservidor.link;
+
   final ImagePicker _picker = ImagePicker();
 
   XFile? _imageFile;
@@ -22,7 +28,7 @@ class _ScanScreenState extends State<ScanScreen> {
   bool _isAnalyzing = false;
   bool _hasRequestedCamera = false;
 
-  static const String _openRouterApiKey = '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';
+  static const String _openRouterApiKey = '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';
 
   @override
   void initState() {
@@ -32,12 +38,116 @@ class _ScanScreenState extends State<ScanScreen> {
     });
   }
 
+  @override
+void dispose() {
+  _player.stop();
+  _player.release();
+  _player.dispose();
+
+  super.dispose();
+}
+
   void _openCameraIfNeeded() {
     if (!_hasRequestedCamera) {
       _hasRequestedCamera = true;
       _pickImage();
     }
   }
+
+  Future<String> getLocalAudioPath(String audioFilename) async {
+  final appDir = await getApplicationDocumentsDirectory();
+
+  return "${appDir.path}/tts/$audioFilename";
+  }
+  Future<String?> descargarYCachearAudio(String audioFilename) async {
+  try {
+    final localPath = await getLocalAudioPath(audioFilename);
+
+    final localFile = File(localPath);
+
+    // Ya existe
+    if (await localFile.exists()) {
+      print("✅ Audio ya cacheado");
+
+      return localPath;
+    }
+
+    // Descargar
+    final audioUrl = "$servidorTTS/outputs/$audioFilename";
+
+    final response = await http.get(Uri.parse(audioUrl));
+
+    if (response.statusCode != 200) {
+      print("❌ Error descargando audio");
+
+      return null;
+    }
+
+    // Crear carpeta
+    await localFile.parent.create(recursive: true);
+
+    // Guardar
+    await localFile.writeAsBytes(response.bodyBytes);
+
+    print("✅ Audio guardado");
+
+    return localPath;
+  } catch (e) {
+    print("❌ Error cacheando audio: $e");
+
+    return null;
+  }
+}
+
+  Future<String?> generarAudioEnServidor(String texto) async {
+  try {
+    final response = await http.post(
+      Uri.parse("$servidorTTS/tts"),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "text": texto,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      print("❌ Error TTS");
+
+      return null;
+    }
+
+    final data = jsonDecode(response.body);
+
+    final String audioFilename = data["audio_filename"];
+
+    print("🎵 Audio generado: $audioFilename");
+
+    return audioFilename;
+  } catch (e) {
+    print("❌ Error generando audio: $e");
+
+    return null;
+  }
+}
+
+Future<void> reproducirAudio(String audioFilename) async {
+  try {
+    final localPath =
+        await descargarYCachearAudio(audioFilename);
+
+    if (localPath == null) return;
+
+    await _player.stop();
+
+    await _player.play(
+      DeviceFileSource(localPath),
+    );
+
+  } catch (e) {
+    print("❌ Error reproduciendo audio: $e");
+  }
+}
 
   Future<void> _pickImage() async {
     final pickedImage = await _picker.pickImage(
@@ -82,58 +192,41 @@ class _ScanScreenState extends State<ScanScreen> {
                 {
                   'type': 'text',
                   'text': '''
-Actúa como arqueólogo, antropólogo, historiador del arte y especialista en patrimonio cultural mexicano.
 
-Tu tarea es identificar a qué civilización, cultura o periodo histórico podría pertenecer esta imagen.
+Actúa como arqueólogo, antropólogo e historiador del patrimonio cultural mexicano.
 
-Analiza visualmente:
+Identifica la posible civilización, cultura o periodo histórico de la imagen.
+
+Analiza:
 
 - Símbolos
-- Figuras humanas
-- Figuras animales
+- Figuras humanas o animales
 - Geometría
-- Pigmentos visibles
-- Técnica de elaboración
-- Material de la superficie (roca, muro, cerámica, piedra)
+- Pigmentos
+- Técnica artística
+- Material visible
 - Estado de conservación
-- Distribución espacial de elementos
 
-Debes responder EXACTAMENTE en este formato:
+Responde SOLO:
 
-🏺 Tipo de evidencia:
-(Pintura rupestre, petrograbado, mural, códice, escultura, etc.)
+🏺 Evidencia:
+🌎 Región cultural:
+🏛 Cultura probable:
+📅 Periodo:
+🎨 Técnica:
+🔍 Evidencias clave:
+⚠ Alternativa:
+⭐ Confianza: Alta / Media / Baja
 
-🌎 Región cultural probable:
-(Mesoamérica, Aridoamérica, Oasisamérica u otra)
+Máximo 2 líneas por apartado.
 
-🏛 Civilización o cultura probable:
-(Maya, Mexica, Teotihuacana, Zapoteca, Mixteca, Tolteca, Olmeca, Totonaca, Huichol, Seri, grupos cazadores-recolectores, etc.)
+Si no hay suficiente evidencia escribe:
 
-📅 Periodo histórico probable:
-(Preclásico, Clásico, Posclásico, Colonial, Prehistórico, etc.)
-
-🎨 Técnica artística observada:
-(Pigmento mineral, carbón, grabado, pintura rupestre, relieve, etc.)
-
-🔍 Evidencias visuales:
-(Explica qué elementos de la imagen apoyan la hipótesis)
-
-⚠ Posibles alternativas:
-(Otras culturas o periodos posibles)
-
-⭐ Contexto histórico:
-(Importancia cultural o arqueológica)
-
-Si NO puedes identificar con certeza la civilización, NO inventes.
-
-Indica:
 "identificación no concluyente"
 
-y explica qué evidencia adicional sería necesaria.
-
-No escribas introducciones.
+No inventes datos.
+No agregues introducción.
 No agradezcas.
-Ve directo al análisis técnico.
 '''
                 },
                 {
@@ -158,6 +251,15 @@ Ve directo al análisis técnico.
         setState(() {
           _analysisResult = result;
         });
+        final textoLimpio =
+    limpiarTextoParaTTS(result);
+
+final audioFilename =
+    await generarAudioEnServidor(textoLimpio);
+
+if (audioFilename != null) {
+  await reproducirAudio(audioFilename);
+}
       } else {
         setState(() {
           _analysisResult =
@@ -174,6 +276,23 @@ Ve directo al análisis técnico.
       });
     }
   }
+
+  String limpiarTextoParaTTS(String texto) {
+
+  // Quitar emojis y símbolos raros
+  texto = texto.replaceAll(
+    RegExp(r'[^\w\sáéíóúÁÉÍÓÚñÑ.,:()-]'),
+    '',
+  );
+
+  // Quitar múltiples saltos
+  texto = texto.replaceAll(RegExp(r'\n+'), '. ');
+
+  // Quitar espacios dobles
+  texto = texto.replaceAll(RegExp(r'\s+'), ' ');
+
+  return texto.trim();
+}
 
   Widget _buildActionButton() {
     if (_imageFile == null) {
