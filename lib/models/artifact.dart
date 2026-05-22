@@ -18,7 +18,13 @@ class Artifact {
   });
 }
 
-enum ArtifactCategory { maya, mexica, olmeca, pinturasRupestres }
+enum ArtifactCategory {
+  maya,
+  mexica,
+  olmeca,
+  pinturasRupestres,
+  piramides, // ← nuevo
+}
 
 // Sample data
 final List<Artifact> sampleArtifacts = [
@@ -41,6 +47,13 @@ final List<Artifact> sampleArtifacts = [
     description: 'Escultura monumental de basalto...',
     category: ArtifactCategory.olmeca,
   ),
+  const Artifact(
+    civilization: 'TEOTIHUACÁN',
+    name: 'Pirámide del Sol',
+    description: 'Una de las estructuras más grandes del mundo antiguo...',
+    date: '100 – 650 d.C.',
+    category: ArtifactCategory.piramides,
+  ),
 ];
 
 // Featured piece data
@@ -53,7 +66,7 @@ final Artifact featuredArtifact = const Artifact(
   category: ArtifactCategory.maya,
 );
 
-//ptnuras rp
+// Pinturas rupestres
 final List<Artifact> rupestreArtifacts = [
   const Artifact(
     civilization: 'Pinturas Rupestres',
@@ -61,5 +74,30 @@ final List<Artifact> rupestreArtifacts = [
     description: 'Pinturas prehistóricas de manos en negativo...',
     date: '10,000 a.C.',
     category: ArtifactCategory.pinturasRupestres,
+  ),
+];
+
+// Pirámides
+final List<Artifact> piramidesArtifacts = [
+  const Artifact(
+    civilization: 'TEOTIHUACÁN',
+    name: 'Pirámide del Sol',
+    description: 'Una de las estructuras más grandes del mundo antiguo...',
+    date: '100 – 650 d.C.',
+    category: ArtifactCategory.piramides,
+  ),
+  const Artifact(
+    civilization: 'MAYA',
+    name: 'El Castillo (Chichén Itzá)',
+    description: 'Pirámide escalonada dedicada a Kukulcán...',
+    date: '800 – 900 d.C.',
+    category: ArtifactCategory.piramides,
+  ),
+  const Artifact(
+    civilization: 'AZTECA',
+    name: 'Templo Mayor',
+    description: 'Centro ceremonial del imperio mexica en Tenochtitlán...',
+    date: '1325 – 1521 d.C.',
+    category: ArtifactCategory.piramides,
   ),
 ];
