@@ -4,81 +4,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../models/artifact.dart';
 import '../theme/app_theme.dart';
 
-class _ArModel {
-  final String label;
-  final String subtitle;
-  final String path;
-
-  const _ArModel({
-    required this.label,
-    required this.subtitle,
-    required this.path,
-  });
-}
-
-const Map<ArtifactCategory, List<_ArModel>> _kModels = {
-  ArtifactCategory.maya: [
-    _ArModel(
-      label: 'Antes',
-      subtitle: 'Reconstrucción digital con jade y pigmentos',
-      path: 'assets/models/mascara_pakal_restaurada.glb',
-    ),
-    _ArModel(
-      label: 'Actual',
-      subtitle: 'Estado físico hallado en 1952',
-      path: 'assets/models/mascara_pakal.glb',
-    ),
-  ],
-  ArtifactCategory.mexica: [
-    _ArModel(
-      label: 'Antes',
-      subtitle: 'Piedra del Sol con policromía original',
-      path: 'assets/models/mexica_antes.glb',
-    ),
-    _ArModel(
-      label: 'Actual',
-      subtitle: 'Basalto sin pigmento, s. XVIII',
-      path: 'assets/models/mexica_actual.glb',
-    ),
-  ],
-  ArtifactCategory.olmeca: [
-    _ArModel(
-      label: 'Antes',
-      subtitle: 'Superficie pulida y pintada',
-      path: 'assets/models/olmeca_antes.glb',
-    ),
-    _ArModel(
-      label: 'Actual',
-      subtitle: 'Erosión natural acumulada',
-      path: 'assets/models/olmeca_actual.glb',
-    ),
-  ],
-  ArtifactCategory.pinturasRupestres: [
-    _ArModel(
-      label: 'Antes',
-      subtitle: 'Colores restaurados digitalmente',
-      path: 'assets/models/rupestre_antes.glb',
-    ),
-    _ArModel(
-      label: 'Actual',
-      subtitle: 'Pigmentos desgastados por el tiempo',
-      path: 'assets/models/rupestre_actual.glb',
-    ),
-  ],
-  ArtifactCategory.piramides: [
-    _ArModel(
-      label: 'Antes',
-      subtitle: 'Reconstrucción con revestimiento original',
-      path: 'assets/models/piramide_antes.glb',
-    ),
-    _ArModel(
-      label: 'Actual',
-      subtitle: 'Estado actual de conservación',
-      path: 'assets/models/piramide_actual.glb',
-    ),
-  ],
-};
-
 class ArViewScreen extends StatefulWidget {
   final Artifact artifact;
 
@@ -97,7 +22,18 @@ class _ArViewScreenState extends State<ArViewScreen>
   late AnimationController _fadeController;
   late Animation<double> _fadeAnim;
 
-  List<_ArModel> get _models => _kModels[widget.artifact.category] ?? [];
+  List<String> get _models => widget.artifact.arModels;
+  List<String> get _labels => widget.artifact.arModelLabels;
+
+  String get _currentModel {
+    if (_models.isEmpty) return '';
+    return _models[_selectedIndex.clamp(0, _models.length - 1)];
+  }
+
+  String get _currentLabel {
+    if (_labels.isEmpty) return 'Modelo ${_selectedIndex + 1}';
+    return _labels[_selectedIndex.clamp(0, _labels.length - 1)];
+  }
 
   Color get _accentColor {
     switch (widget.artifact.category) {
@@ -146,7 +82,7 @@ class _ArViewScreenState extends State<ArViewScreen>
   }
 
   void _selectModel(int index) {
-    if (index == _selectedIndex) return;
+    if (index == _selectedIndex || index >= _models.length) return;
     _fadeController.reverse().then((_) {
       setState(() {
         _selectedIndex = index;
@@ -185,14 +121,29 @@ class _ArViewScreenState extends State<ArViewScreen>
 
   @override
   Widget build(BuildContext context) {
-    final models = _models;
-    if (models.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('Sin modelos disponibles')),
+    if (_models.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: AppColors.textMuted),
+              const SizedBox(height: 16),
+              const Text(
+                'Sin modelos disponibles',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
-    final current = models[_selectedIndex];
+    final subtitles = [
+      'Reconstrucción digital con detalle original',
+      'Estado actual de conservación',
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -200,8 +151,7 @@ class _ArViewScreenState extends State<ArViewScreen>
         bottom: false,
         child: Column(
           children: [
-
-            // ── Top bar ─────────────────────────────────────────
+            // Top bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
@@ -225,7 +175,7 @@ class _ArViewScreenState extends State<ArViewScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          current.subtitle,
+                          _currentLabel,
                           style: TextStyle(
                             fontSize: 11,
                             color: _accentTextColor.withValues(alpha: 0.8),
@@ -239,14 +189,14 @@ class _ArViewScreenState extends State<ArViewScreen>
               ),
             ),
 
-            // ── ModelViewer ─────────────────────────────────────
+            // ModelViewer
             Expanded(
               child: FadeTransition(
                 opacity: _fadeAnim,
                 child: ModelViewer(
                   key: _viewerKey,
-                  src: current.path,
-                  alt: current.label,
+                  src: _currentModel,
+                  alt: '${widget.artifact.name} - $_currentLabel',
                   ar: true,
                   arModes: const ['scene-viewer', 'webxr', 'quick-look'],
                   autoRotate: true,
@@ -260,7 +210,7 @@ class _ArViewScreenState extends State<ArViewScreen>
               ),
             ),
 
-            // ── Panel inferior ──────────────────────────────────
+            // Panel inferior con selección de modelos
             Container(
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -274,7 +224,6 @@ class _ArViewScreenState extends State<ArViewScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   Padding(
                     padding: const EdgeInsets.only(top: 14, left: 20, right: 20, bottom: 8),
                     child: Row(
@@ -295,10 +244,11 @@ class _ArViewScreenState extends State<ArViewScreen>
                     ),
                   ),
 
-                  // ── Lista de versiones ────────────────────────
-                  ...List.generate(models.length, (i) {
-                    final m = models[i];
+                  // Lista de versiones
+                  ...List.generate(_models.length, (i) {
                     final isActive = i == _selectedIndex;
+                    final label = _labels.length > i ? _labels[i] : 'Versión ${i + 1}';
+                    final subtitle = subtitles.length > i ? subtitles[i] : '';
 
                     return GestureDetector(
                       onTap: () => _selectModel(i),
@@ -353,21 +303,23 @@ class _ArViewScreenState extends State<ArViewScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    m.label,
+                                    label,
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                                       color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    m.subtitle,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textMuted.withValues(alpha: 0.65),
+                                  if (subtitle.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      subtitle,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textMuted.withValues(alpha: 0.65),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -392,7 +344,7 @@ class _ArViewScreenState extends State<ArViewScreen>
                     );
                   }),
 
-                  // ── Botón AR ──────────────────────────────────
+                  // Botón AR
                   SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
