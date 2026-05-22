@@ -35,7 +35,6 @@ class BottomNavBar extends StatelessWidget {
                 isSelected: selectedIndex == 0,
                 onTap: () => onTap(0),
               ),
-              
               _NavItem(
                 icon: Icons.qr_code_scanner,
                 label: 'Escanear',
@@ -43,16 +42,10 @@ class BottomNavBar extends StatelessWidget {
                 onTap: () => onTap(1),
               ),
               _NavItem(
-                icon: Icons.brush,
-                label: 'Pinturas',
-                isSelected: selectedIndex == 2,
-                onTap: () => onTap(2),
-              ),
-              _NavItem(
                 icon: Icons.settings,
                 label: 'Ajustes',
-                isSelected: selectedIndex == 3,
-                onTap: () => onTap(3),
+                isSelected: selectedIndex == 2,
+                onTap: () => onTap(2),
               ),
             ],
           ),

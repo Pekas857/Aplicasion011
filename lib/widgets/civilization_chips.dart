@@ -17,7 +17,6 @@ class _CivilizationChipsState extends State<CivilizationChips> {
     'Maya',
     'Mexica',
     'Olmeca',
-    'Pinturas rupestres',
   ];
 
   @override
