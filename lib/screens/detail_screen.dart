@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_theme.dart';
 import '../models/artifact.dart';
 import 'ar_view_screen.dart';
@@ -16,17 +17,74 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late AudioPlayer _audioPlayer;
+  bool _isAudioPlaying = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+@override
+void initState() {
+  super.initState();
+
+  _tabController = TabController(length: 2, vsync: this);
+  _audioPlayer = AudioPlayer();
+
+  _tabController.addListener(() async {
+    if (_tabController.indexIsChanging) {
+      await _audioPlayer.stop();
+
+      if (!mounted) return;
+      setState(() {
+        _isAudioPlaying = false;
+      });
+    }
+  });
+
+  _audioPlayer.onPlayerComplete.listen((_) {
+    if (!mounted) return;
+    setState(() {
+      _isAudioPlaying = false;
+    });
+  });
+}
 
   @override
   void dispose() {
     _tabController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
+  }
+
+  String _slugForName(String name) {
+    var s = name.toLowerCase();
+    s = s.replaceAll(RegExp(r"[^a-z0-9]+"), '_');
+    s = s.replaceAll(RegExp(r'_+'), '_').trim();
+    if (s.startsWith('_')) s = s.substring(1);
+    if (s.endsWith('_')) s = s.substring(0, s.length - 1);
+    return s;
+  }
+
+  Future<void> _playAudioForCurrentTab() async {
+    final a = widget.artifact;
+    final tabIndex = _tabController.index;
+    final slug = _slugForName(a.name);
+    final assetPath = tabIndex == 0
+        ? 'assets/audio/${slug}_history.wav'
+        : 'assets/audio/${slug}_discovery.wav';
+
+    try {
+      setState(() {
+        _isAudioPlaying = true;
+      });
+
+      // The AssetSource path is relative to the assets/ directory in audioplayers
+      await _audioPlayer.play(AssetSource(assetPath.replaceFirst('assets/', '')));
+    } catch (e) {
+      setState(() {
+        _isAudioPlaying = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Audio no disponible: ${assetPath}'),
+      ));
+    }
   }
 
   Color get _tagColor {
@@ -226,28 +284,50 @@ class _DetailScreenState extends State<DetailScreen>
                       ),
                     const SizedBox(height: 28),
 
-                    // Tabs
+                    // Tabs with Listen button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: TabBar(
-                        controller: _tabController,
-                        labelColor: AppColors.textPrimary,
-                        unselectedLabelColor: AppColors.textMuted,
-                        labelStyle: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        unselectedLabelStyle: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        indicatorColor: AppColors.gold,
-                        indicatorWeight: 2.5,
-                        indicatorSize: TabBarIndicatorSize.label,
-                        dividerColor: AppColors.divider.withValues(alpha: 0.4),
-                        tabs: const [
-                          Tab(text: 'Historia'),
-                          Tab(text: 'Descubrimiento'),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TabBar(
+                              controller: _tabController,
+                              labelColor: AppColors.textPrimary,
+                              unselectedLabelColor: AppColors.textMuted,
+                              labelStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              unselectedLabelStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              indicatorColor: AppColors.gold,
+                              indicatorWeight: 2.5,
+                              indicatorSize: TabBarIndicatorSize.label,
+                              dividerColor:
+                                  AppColors.divider.withValues(alpha: 0.4),
+                              tabs: const [
+                                Tab(text: 'Historia'),
+                                Tab(text: 'Descubrimiento'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: _isAudioPlaying
+                                ? () async {
+                                    await _audioPlayer.stop();
+                                    setState(() {
+                                      _isAudioPlaying = false;
+                                    });
+                                  }
+                                : _playAudioForCurrentTab,
+                            icon: Icon(
+                              _isAudioPlaying ? Icons.stop : Icons.volume_up,
+                              color: AppColors.gold,
+                            ),
+                          ),
                         ],
                       ),
                     ),
