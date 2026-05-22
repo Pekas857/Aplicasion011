@@ -24,6 +24,8 @@ class _ArViewScreenState extends State<ArViewScreen>
 
   List<String> get _models => widget.artifact.arModels;
   List<String> get _labels => widget.artifact.arModelLabels;
+  
+  bool get _hasMultipleModels => _models.length > 1;
 
   String get _currentModel {
     if (_models.isEmpty) return '';
@@ -31,7 +33,7 @@ class _ArViewScreenState extends State<ArViewScreen>
   }
 
   String get _currentLabel {
-    if (_labels.isEmpty) return 'Modelo ${_selectedIndex + 1}';
+    if (_labels.isEmpty) return 'Modelo';
     return _labels[_selectedIndex.clamp(0, _labels.length - 1)];
   }
 
@@ -140,11 +142,6 @@ class _ArViewScreenState extends State<ArViewScreen>
       );
     }
 
-    final subtitles = [
-      'Reconstrucción digital con detalle original',
-      'Estado actual de conservación',
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -175,7 +172,7 @@ class _ArViewScreenState extends State<ArViewScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          _currentLabel,
+                          _hasMultipleModels ? _currentLabel : 'Modelo 3D',
                           style: TextStyle(
                             fontSize: 11,
                             color: _accentTextColor.withValues(alpha: 0.8),
@@ -185,6 +182,13 @@ class _ArViewScreenState extends State<ArViewScreen>
                       ],
                     ),
                   ),
+                  // Indicador de AR
+                  Icon(
+                    Icons.view_in_ar,
+                    color: AppColors.gold.withValues(alpha: 0.7),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
                 ],
               ),
             ),
@@ -210,7 +214,129 @@ class _ArViewScreenState extends State<ArViewScreen>
               ),
             ),
 
-            // Panel inferior con selección de modelos
+            // Panel inferior - Solo mostrar selector si hay múltiples modelos
+            if (_hasMultipleModels)
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border(
+                    top: BorderSide(
+                      color: AppColors.goldDark.withValues(alpha: 0.2),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 14, left: 20, right: 20, bottom: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.layers_outlined, size: 13,
+                              color: AppColors.textMuted.withValues(alpha: 0.5)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'VERSIONES DEL MODELO',
+                            style: TextStyle(
+                              fontSize: 10,
+                              letterSpacing: 1.6,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Lista de versiones
+                    ...List.generate(_models.length, (i) {
+                      final isActive = i == _selectedIndex;
+                      final label = _labels.length > i ? _labels[i] : 'Versión ${i + 1}';
+
+                      return GestureDetector(
+                        onTap: () => _selectModel(i),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? _accentColor.withValues(alpha: 0.10)
+                                : AppColors.background,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isActive
+                                  ? _accentColor.withValues(alpha: 0.45)
+                                  : AppColors.divider.withValues(alpha: 0.25),
+                              width: isActive ? 1.5 : 0.5,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 220),
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isActive
+                                      ? _accentColor.withValues(alpha: 0.18)
+                                      : AppColors.surface,
+                                  border: Border.all(
+                                    color: isActive
+                                        ? _accentColor.withValues(alpha: 0.5)
+                                        : AppColors.divider.withValues(alpha: 0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${i + 1}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: isActive ? _accentTextColor : AppColors.textMuted,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                                    color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 220),
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isActive ? _accentColor : Colors.transparent,
+                                  border: Border.all(
+                                    color: isActive
+                                        ? _accentColor
+                                        : AppColors.divider.withValues(alpha: 0.35),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+
+            // Botón AR (siempre visible)
             Container(
               decoration: BoxDecoration(
                 color: AppColors.surface,
@@ -221,170 +347,51 @@ class _ArViewScreenState extends State<ArViewScreen>
                   ),
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 14, left: 20, right: 20, bottom: 8),
-                    child: Row(
-                      children: [
-                        Icon(Icons.layers_outlined, size: 13,
-                            color: AppColors.textMuted.withValues(alpha: 0.5)),
-                        const SizedBox(width: 6),
-                        Text(
-                          'VERSIONES DEL MODELO',
-                          style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 1.6,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted.withValues(alpha: 0.5),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _activateAR,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.gold.withValues(alpha: 0.15),
+                        foregroundColor: AppColors.gold,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: BorderSide(
+                            color: AppColors.gold.withValues(alpha: 0.5),
+                            width: 1.5,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-
-                  // Lista de versiones
-                  ...List.generate(_models.length, (i) {
-                    final isActive = i == _selectedIndex;
-                    final label = _labels.length > i ? _labels[i] : 'Versión ${i + 1}';
-                    final subtitle = subtitles.length > i ? subtitles[i] : '';
-
-                    return GestureDetector(
-                      onTap: () => _selectModel(i),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isActive
-                              ? _accentColor.withValues(alpha: 0.10)
-                              : AppColors.background,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: isActive
-                                ? _accentColor.withValues(alpha: 0.45)
-                                : AppColors.divider.withValues(alpha: 0.25),
-                            width: isActive ? 1.5 : 0.5,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 220),
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isActive
-                                    ? _accentColor.withValues(alpha: 0.18)
-                                    : AppColors.surface,
-                                border: Border.all(
-                                  color: isActive
-                                      ? _accentColor.withValues(alpha: 0.5)
-                                      : AppColors.divider.withValues(alpha: 0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${i + 1}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: isActive ? _accentTextColor : AppColors.textMuted,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    label,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                                      color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  if (subtitle.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      subtitle,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.textMuted.withValues(alpha: 0.65),
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 220),
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isActive ? _accentColor : Colors.transparent,
-                                border: Border.all(
-                                  color: isActive
-                                      ? _accentColor
-                                      : AppColors.divider.withValues(alpha: 0.35),
-                                  width: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        elevation: 0,
                       ),
-                    );
-                  }),
-
-                  // Botón AR
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _activateAR,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.gold.withValues(alpha: 0.15),
-                            foregroundColor: AppColors.gold,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              side: BorderSide(
-                                color: AppColors.gold.withValues(alpha: 0.5),
-                                width: 1.5,
-                              ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.view_in_ar,
+                            size: 20,
+                            color: AppColors.gold,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            _hasMultipleModels 
+                                ? 'VER EN TU SALA (AR)' 
+                                : 'VER EN REALIDAD AUMENTADA',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.5,
+                              color: AppColors.gold,
                             ),
-                            elevation: 0,
                           ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.view_in_ar, size: 20),
-                              SizedBox(width: 10),
-                              Text(
-                                'VER EN TU SALA (AR)',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ],

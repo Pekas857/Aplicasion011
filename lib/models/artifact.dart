@@ -20,9 +20,9 @@ class Artifact {
   final String discovered;
   final String previewModel;
   
-  // Modelos AR específicos para cada artefacto
-  final List<String> arModels; // [modelo_restaurado, modelo_original]
-  final List<String> arModelLabels; // Etiquetas para cada modelo
+  // Modelos AR - puede ser 1 o más
+  final List<String> arModels;
+  final List<String> arModelLabels;
 
   const Artifact({
     required this.civilization,
@@ -41,7 +41,6 @@ class Artifact {
     this.arModelLabels = const [],
   });
 }
-
 // Datos de ejemplo con modelos AR específicos
 final List<Artifact> sampleArtifacts = [
   const Artifact(
@@ -72,45 +71,44 @@ final List<Artifact> sampleArtifacts = [
         'Inscripciones en Palenque, Chiapas. Fue uno de los hallazgos más '
         'importantes de la arqueología mesoamericana, revelando que las '
         'pirámides mayas también servían como tumbas reales.',
-  ),
-  const Artifact(
-    civilization: 'OLMECA',
-    name: 'Cabeza Colosal No. 1',
-    description: 'Escultura monumental de basalto de la cultura olmeca',
-    date: '1200 a.C.',
-    category: ArtifactCategory.olmeca,
-    period: 'Período Preclásico (1200 – 900 a.C.)',
-    discovered: 'Descubierto en 1862',
-    previewModel: 'assets/models/cabeza.glb',
-    arModels: [
-      'assets/models/olmeca_antes.glb',
-      'assets/models/olmeca_actual.glb',
-    ],
-    arModelLabels: ['Restaurada', 'Original'],
-    historyText:
-        'Las Cabezas Colosales olmecas son monumentales esculturas de basalto '
-        'que representan rostros humanos con rasgos individualizados. La Cabeza '
-        'Colosal No. 1 fue descubierta en San Lorenzo Tenochtitlán, Veracruz. '
-        'Mide aproximadamente 2.85 metros de altura y pesa alrededor de 25 '
-        'toneladas. Se cree que representan a gobernantes olmecas.',
-    discoveryText:
-        'La Cabeza Colosal No. 1 fue descubierta en 1862 por el viajero '
-        'José María Melgar y Serrano en la hacienda de Hueyapan, en el '
-        'municipio de Texistepec, Veracruz. Las investigaciones posteriores '
-        'de Matthew Stirling en 1938-1946 revelaron la importancia de la '
-        'civilización olmeca como la cultura madre de Mesoamérica.',
+      ),
+    const Artifact(
+      civilization: 'Olmeca',
+      name: 'Cabeza Colosal No. 1',
+      description: 'Escultura monumental de basalto de la cultura olmeca',
+      date: '1200 a.C.',
+      category: ArtifactCategory.olmeca,
+      period: 'Período Preclásico (1200 – 900 a.C.)',
+      discovered: 'Descubierto en 1862',
+      previewModel: 'assets/models/cabeza.glb',
+      arModels: [
+        'assets/models/cabeza.glb',  // Solo un modelo
+      ],
+      arModelLabels: ['Cabeza Colosal'],
+      historyText:
+          'Las Cabezas Colosales olmecas son monumentales esculturas de basalto '
+          'que representan rostros humanos con rasgos individualizados. La Cabeza '
+          'Colosal No. 1 fue descubierta en San Lorenzo Tenochtitlán, Veracruz. '
+          'Mide aproximadamente 2.85 metros de altura y pesa alrededor de 25 '
+          'toneladas. Se cree que representan a gobernantes olmecas.',
+      discoveryText:
+          'La Cabeza Colosal No. 1 fue descubierta en 1862 por el viajero '
+          'José María Melgar y Serrano en la hacienda de Hueyapan, en el '
+          'municipio de Texistepec, Veracruz. Las investigaciones posteriores '
+          'de Matthew Stirling entre 1938 y 1946 revelaron la importancia de la '
+          'civilización olmeca como la cultura madre de Mesoamérica.',
     ),
     const Artifact(
     civilization: 'Olmeca',
     name: 'Máscara del Sol',
     description:
-        'Máscara ritual olmeca asociada al simbolismo solar y al poder religioso.',
+        'asociada al simbolismo solar y al poder religioso.',
     date: '900 a.C.',
     category: ArtifactCategory.olmeca,
     period: 'Período Preclásico Medio (1200 – 900 a.C.)',
     discovered:
         'Hallazgos arqueológicos en la región del Golfo de México',
-    previewModel: 'assets/models/mascara_sol.glb',
+    previewModel: 'assets/models/mascara_solActual.glb',
     arModels: [
       'assets/models/mascara_solActual.glb',
       'assets/models/mascara_solAntes.glb',
@@ -138,8 +136,8 @@ final List<Artifact> sampleArtifacts = [
     discovered: 'Redescubierto arqueológicamente en 1978',
     previewModel: 'assets/models/templo_mayorActual.glb',
     arModels: [
-      'assets/models/templo_mayorActual.glb',
       'assets/models/templo_mayorRestaurado.glb',
+      'assets/models/templo_mayorActual.glb',
     ],
     arModelLabels: ['Reconstruido', 'Actual'],
     historyText:
@@ -157,12 +155,12 @@ final List<Artifact> sampleArtifacts = [
     description: 'Pirámide ceremonial maya en Chichén Itzá',
     date: '900 d.C.',
     category: ArtifactCategory.piramides,
-    period: 'Período Posclásico Temprano (900 – 1200 d.C.)',
+    period: 'Período Posclásico Temprano (900 - 1200 d.C.)',
     discovered: 'Redescubierta en el siglo XIX',
-    previewModel: 'assets/models/kukulkanAntes.glb',
+    previewModel: 'assets/models/kukulcanActual.glb',
     arModels: [
-      'assets/models/kukulkanAntes.glb',
-      'assets/models/kukulkanActual.glb',
+      'assets/models/kukulcan.glb',
+      'assets/models/kukulcanActual.glb',
     ],
     arModelLabels: ['Reconstruida', 'Actual'],
     historyText:
