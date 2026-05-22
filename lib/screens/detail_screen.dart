@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 import '../theme/app_theme.dart';
 import '../models/artifact.dart';
 import '../models/picture.dart';
+import 'ar_view_screen.dart';
+
+String _previewModelPath(ArtifactCategory category) {
+  switch (category) {
+    case ArtifactCategory.maya:
+      return 'assets/models/mascara_pakal.glb';
+    case ArtifactCategory.mexica:
+      return 'assets/models/mexica_antes.glb';
+    case ArtifactCategory.olmeca:
+      return 'assets/models/olmeca_antes.glb';
+    case ArtifactCategory.pinturasRupestres:
+      return 'assets/models/rupestre_antes.glb';
+    case ArtifactCategory.piramides:
+      return 'assets/models/piramide_antes.glb';
+  }
+}
 
 class DetailScreen extends StatefulWidget {
   final Artifact artifact;
@@ -28,7 +45,6 @@ class _DetailScreenState extends State<DetailScreen>
     super.dispose();
   }
 
-  // Full history text per artifact
   String get _historyText {
     switch (widget.artifact.category) {
       case ArtifactCategory.maya:
@@ -59,6 +75,13 @@ class _DetailScreenState extends State<DetailScreen>
             'como la Cueva de las Manos y datan de miles de años antes de Cristo. '
             'A través de pigmentos naturales y manos en negativo, reflejan la vida '
             'y el arte de las sociedades prehistóricas de la región.';
+      case ArtifactCategory.piramides:
+        return 'Las pirámides mesoamericanas son monumentos arquitectónicos de gran '
+            'escala construidos por diversas civilizaciones como la maya, la azteca '
+            'y la teotihuacana. Funcionaban como centros ceremoniales, tumbas reales '
+            'y observatorios astronómicos. La Pirámide del Sol en Teotihuacán es una '
+            'de las más grandes del mundo, con una base de 225 metros por lado y '
+            '65 metros de altura.';
     }
   }
 
@@ -89,6 +112,13 @@ class _DetailScreenState extends State<DetailScreen>
             'del arte rupestre americano. Se hicieron con pigmentos naturales '
             'aplicados directamente sobre las paredes de la cueva, creando un '
             'testimonio visual de la vida de los primeros habitantes de la región.';
+      case ArtifactCategory.piramides:
+        return 'Las grandes pirámides de Teotihuacán fueron redescubiertas y '
+            'estudiadas sistemáticamente a partir del siglo XIX. Las excavaciones '
+            'arqueológicas del siglo XX revelaron que la ciudad de Teotihuacán '
+            'fue una de las más grandes del mundo antiguo, con una población '
+            'estimada de 100,000 a 200,000 habitantes en su apogeo alrededor '
+            'del año 450 d.C.';
     }
   }
 
@@ -102,6 +132,8 @@ class _DetailScreenState extends State<DetailScreen>
         return 'Período Preclásico (1200 – 900 a.C.)';
       case ArtifactCategory.pinturasRupestres:
         return 'Arte prehistórico (hasta 10,000 a.C.)';
+      case ArtifactCategory.piramides:
+        return 'Período Clásico (100 – 650 d.C.)';
     }
   }
 
@@ -115,6 +147,8 @@ class _DetailScreenState extends State<DetailScreen>
         return 'Descubierto en 1862';
       case ArtifactCategory.pinturasRupestres:
         return 'Descubierto en 10,000 a.C.';
+      case ArtifactCategory.piramides:
+        return 'Explorado s. XIX';
     }
   }
 
@@ -128,6 +162,8 @@ class _DetailScreenState extends State<DetailScreen>
         return AppColors.olmecaTag;
       case ArtifactCategory.pinturasRupestres:
         return const Color(0xFF6E7A35);
+      case ArtifactCategory.piramides:
+        return const Color(0xFF8B6914);
     }
   }
 
@@ -141,19 +177,8 @@ class _DetailScreenState extends State<DetailScreen>
         return const Color(0xFFD4A870);
       case ArtifactCategory.pinturasRupestres:
         return const Color(0xFFD9DBA3);
-    }
-  }
-
-  IconData get _iconData {
-    switch (widget.artifact.category) {
-      case ArtifactCategory.maya:
-        return Icons.masks;
-      case ArtifactCategory.mexica:
-        return Icons.wb_sunny;
-      case ArtifactCategory.olmeca:
-        return Icons.face;
-      case ArtifactCategory.pinturasRupestres:
-        return Icons.brush;
+      case ArtifactCategory.piramides:
+        return const Color(0xFFE8C97A);
     }
   }
 
@@ -198,7 +223,8 @@ class _DetailScreenState extends State<DetailScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Image / artifact visual area
+
+                    // ── Preview 3D girando ───────────────────────
                     Container(
                       width: double.infinity,
                       height: 240,
@@ -211,42 +237,33 @@ class _DetailScreenState extends State<DetailScreen>
                           width: 0.5,
                         ),
                       ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Stack(
                           children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _tagColor.withValues(alpha: 0.15),
-                                border: Border.all(
-                                  color: _tagColor.withValues(alpha: 0.4),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Icon(
-                                _iconData,
-                                color: _tagColor,
-                                size: 40,
-                              ),
+                            ModelViewer(
+                              src: _previewModelPath(widget.artifact.category),
+                              alt: widget.artifact.name,
+                              autoRotate: true,
+                              autoRotateDelay: 0,
+                              rotationPerSecond: '20deg',
+                              cameraControls: false,
+                              disableZoom: true,
+                              ar: false,
+                              backgroundColor: Colors.transparent,
+                              disableTap: true,
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Modelo 3D',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted.withValues(
-                                  alpha: 0.6,
-                                ),
-                                fontStyle: FontStyle.italic,
+                            Positioned.fill(
+                              child: AbsorbPointer(
+                                absorbing: true,
+                                child: Container(color: Colors.transparent),
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 24),
 
                     // Tag + discovered
@@ -282,9 +299,7 @@ class _DetailScreenState extends State<DetailScreen>
                             _discovered,
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.textSecondary.withValues(
-                                alpha: 0.7,
-                              ),
+                              color: AppColors.textSecondary.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -307,7 +322,7 @@ class _DetailScreenState extends State<DetailScreen>
                     ),
                     const SizedBox(height: 6),
 
-                    // Period subtitle
+                    // Period
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
@@ -354,7 +369,6 @@ class _DetailScreenState extends State<DetailScreen>
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          // Historia tab
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
@@ -366,7 +380,6 @@ class _DetailScreenState extends State<DetailScreen>
                               ),
                             ),
                           ),
-                          // Descubrimiento tab
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Text(
@@ -390,15 +403,19 @@ class _DetailScreenState extends State<DetailScreen>
             // Bottom AR button
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 child: SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ArViewScreen(artifact: widget.artifact),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.gold.withValues(alpha: 0.15),
                       foregroundColor: AppColors.gold,
