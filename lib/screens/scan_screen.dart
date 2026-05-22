@@ -28,7 +28,7 @@ class _ScanScreenState extends State<ScanScreen> {
   bool _isAnalyzing = false;
   bool _hasRequestedCamera = false;
 
-  static const String _openRouterApiKey = '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';
+  static const String _openRouterApiKey = '';
 
   @override
   void initState() {
