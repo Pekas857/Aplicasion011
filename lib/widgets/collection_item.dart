@@ -18,6 +18,8 @@ class CollectionItem extends StatelessWidget {
         return AppColors.olmecaTag;
       case ArtifactCategory.pinturasRupestres:
         return const Color(0xFF6E7A35);
+      case ArtifactCategory.piramides:
+        return const Color(0xFF8B6914);
     }
   }
 
@@ -31,6 +33,8 @@ class CollectionItem extends StatelessWidget {
         return const Color(0xFFD4A870);
       case ArtifactCategory.pinturasRupestres:
         return const Color(0xFFD9DBA3);
+      case ArtifactCategory.piramides:
+        return const Color(0xFFE8C97A);
     }
   }
 
@@ -44,6 +48,8 @@ class CollectionItem extends StatelessWidget {
         return Icons.face;
       case ArtifactCategory.pinturasRupestres:
         return Icons.brush;
+      case ArtifactCategory.piramides:
+        return Icons.account_balance;
     }
   }
 
@@ -57,6 +63,8 @@ class CollectionItem extends StatelessWidget {
         return const Color(0xFF3A2A18);
       case ArtifactCategory.pinturasRupestres:
         return const Color(0xFF4A4B2A);
+      case ArtifactCategory.piramides:
+        return const Color(0xFF3A2E10);
     }
   }
 
